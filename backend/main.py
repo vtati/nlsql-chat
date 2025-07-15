@@ -15,7 +15,11 @@ app = FastAPI(title="Natural Language to SQL API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server
+    allow_origins=[
+        "http://localhost:3000",  # React dev server
+        "https://*.vercel.app",   # Vercel deployments
+        "https://nlsql-chat.vercel.app",  # Your production domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
