@@ -17,8 +17,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",  # React dev server
-        "https://*.vercel.app",   # Vercel deployments
-        "https://nlsql-chat.vercel.app",  # Your production domain
+        "https://*.vercel.app",   # All Vercel deployments
+        "*",  # Allow all origins for now - restrict in production
     ],
     allow_credentials=True,
     allow_methods=["*"],
