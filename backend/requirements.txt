@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+aiosqlite
+openai
+python-dotenv
+pydantic
+python-multipart
