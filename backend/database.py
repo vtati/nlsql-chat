@@ -1,62 +1,69 @@
-import aiosqlite
+import asyncpg
 import asyncio
 import os
 from typing import List, Dict, Any, Tuple
 
 class DatabaseManager:
     def __init__(self, database_url: str = None):
-        # Use SQLite for simplicity - extract path from URL or use default
-        if database_url and database_url.startswith('sqlite:///'):
-            self.db_path = database_url.replace('sqlite:///', '')
-        else:
-            self.db_path = 'sample_database.db'
+        self.database_url = database_url or os.getenv("DATABASE_URL")
         self.connection = None
     
     async def get_connection(self):
         """Get database connection"""
         if not self.connection:
-            self.connection = await aiosqlite.connect(self.db_path)
-            self.connection.row_factory = aiosqlite.Row
+            self.connection = await asyncpg.connect(self.database_url)
         return self.connection
     
     async def test_connection(self):
         """Test database connection"""
         conn = await self.get_connection()
-        cursor = await conn.execute("SELECT 1")
-        result = await cursor.fetchone()
-        await cursor.close()
-        return result[0] if result else None
+        result = await conn.fetchval("SELECT 1")
+        return result
     
     async def get_schema(self) -> str:
-        """Get database schema information"""
+        """Get database schema information for PostgreSQL"""
         conn = await self.get_connection()
         
-        # Get all tables
-        cursor = await conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
-        tables = await cursor.fetchall()
-        await cursor.close()
+        # Get all tables and their columns from PostgreSQL information_schema
+        query = """
+        SELECT 
+            t.table_name,
+            c.column_name,
+            c.data_type,
+            c.is_nullable,
+            c.column_default,
+            CASE WHEN pk.column_name IS NOT NULL THEN 'PRIMARY KEY' ELSE NULL END as constraint_type
+        FROM information_schema.tables t
+        LEFT JOIN information_schema.columns c ON t.table_name = c.table_name
+        LEFT JOIN (
+            SELECT ku.table_name, ku.column_name
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage ku ON tc.constraint_name = ku.constraint_name
+            WHERE tc.constraint_type = 'PRIMARY KEY'
+        ) pk ON c.table_name = pk.table_name AND c.column_name = pk.column_name
+        WHERE t.table_schema = 'public' 
+            AND t.table_type = 'BASE TABLE'
+        ORDER BY t.table_name, c.ordinal_position;
+        """
         
+        results = await conn.fetch(query)
+        
+        # Format schema information
         schema_text = "Database Schema:\n\n"
+        current_table = None
         
-        for table_row in tables:
-            table_name = table_row[0]
-            schema_text += f"Table: {table_name}\n"
+        for row in results:
+            if row['table_name'] != current_table:
+                if current_table is not None:
+                    schema_text += "\n"
+                current_table = row['table_name']
+                schema_text += f"Table: {current_table}\n"
             
-            # Get column information for each table
-            cursor = await conn.execute(f"PRAGMA table_info({table_name})")
-            columns = await cursor.fetchall()
-            await cursor.close()
+            constraint_info = f" ({row['constraint_type']})" if row['constraint_type'] else ""
+            nullable = "NULL" if row['is_nullable'] == 'YES' else "NOT NULL"
+            default = f" DEFAULT {row['column_default']}" if row['column_default'] else ""
             
-            for col in columns:
-                col_name = col[1]
-                col_type = col[2]
-                not_null = "NOT NULL" if col[3] else "NULL"
-                default_val = f" DEFAULT {col[4]}" if col[4] else ""
-                primary_key = " (PRIMARY KEY)" if col[5] else ""
-                
-                schema_text += f"  - {col_name}: {col_type} {not_null}{default_val}{primary_key}\n"
-            
-            schema_text += "\n"
+            schema_text += f"  - {row['column_name']}: {row['data_type']} {nullable}{default}{constraint_info}\n"
         
         return schema_text
     
@@ -69,12 +76,10 @@ class DatabaseManager:
         conn = await self.get_connection()
         
         try:
-            cursor = await conn.execute(sql_query)
-            results = await cursor.fetchall()
-            await cursor.close()
+            results = await conn.fetch(sql_query)
             
-            # Get column names from cursor description
-            columns = [description[0] for description in cursor.description] if cursor.description else []
+            # Get column names
+            columns = list(results[0].keys()) if results else []
             
             # Convert to list of dictionaries
             result_list = [dict(row) for row in results]
@@ -90,5 +95,5 @@ class DatabaseManager:
             await self.connection.close()
     
     def __del__(self):
-        # SQLite connections should be closed explicitly with await
+        # Connections should be closed explicitly with await
         pass
