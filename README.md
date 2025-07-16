@@ -32,14 +32,17 @@ A chat-based application that converts natural language queries into SQL stateme
 └── start.bat            # Quick start script
 ```
 
-## 🚀 MVP Features
+## 🚀 Enhanced Features (v2.0)
 
+- **Multi-Database Support**: SQLite, PostgreSQL, MySQL, SQL Server, Oracle
 - **Natural Language Processing**: Convert plain English questions to SQL
+- **Database-Aware SQL Generation**: Dialect-specific query generation
 - **Chat Interface**: Real-time conversational UI with message history
-- **SQL Generation**: Powered by OpenAI GPT-3.5-turbo
+- **Smart Query Optimization**: Database-specific syntax and features
 - **Query Execution**: Safe execution of SELECT queries only
 - **Result Display**: Tabular format with export capabilities
-- **Schema Detection**: Automatic database schema extraction
+- **Schema Detection**: Automatic database schema extraction for all supported databases
+- **Connection Testing**: Built-in database connection validation
 - **Error Handling**: Comprehensive error messages and validation
 
 ## 🎯 Getting Started
@@ -132,18 +135,96 @@ products (product_id, product_name, category, unit_price, units_in_stock)
 orders (order_id, customer_id, order_date, total_amount)
 ```
 
+## 🗄️ Multi-Database Support
+
+### Supported Databases
+
+| Database | Status | Driver | Features |
+|----------|--------|--------|----------|
+| **SQLite** | ✅ Ready | aiosqlite | File-based, LIMIT syntax |
+| **PostgreSQL** | ✅ Ready | asyncpg | ILIKE support, schemas |
+| **MySQL/MariaDB** | ✅ Ready | aiomysql | LIMIT syntax, schemas |
+| **SQL Server** | 🚧 Coming Soon | pyodbc | TOP syntax, schemas |
+| **Oracle** | 🚧 Coming Soon | cx_Oracle | ROWNUM syntax, schemas |
+
+### Database Configuration Examples
+
+```bash
+# SQLite (Development - Default)
+DATABASE_URL=sqlite:///northwind.db
+
+# PostgreSQL (Production Recommended)
+DATABASE_URL=postgresql://username:password@host:port/database
+
+# MySQL/MariaDB (Alternative Production)
+DATABASE_URL=mysql://username:password@host:port/database
+
+# SQL Server (Enterprise)
+DATABASE_URL=mssql://username:password@host:port/database
+
+# Oracle (Enterprise)
+DATABASE_URL=oracle://username:password@host:port/service
+```
+
+### Database Testing & Setup
+
+```bash
+# Test all database connections
+cd backend
+python test_multi_db.py
+
+# Test specific database
+python test_multi_db.py "postgresql://user:pass@host:5432/db"
+
+# Setup database with sample data
+python setup_multi_db.py
+
+# Setup specific database
+python setup_multi_db.py "mysql://user:pass@host:3306/db"
+```
+
+### Database-Specific Features
+
+#### SQLite
+- **Best for**: Development, small applications
+- **Features**: File-based, no server required
+- **Limitations**: No concurrent writes, basic text search
+
+#### PostgreSQL
+- **Best for**: Production applications, complex queries
+- **Features**: ILIKE for case-insensitive search, advanced SQL features
+- **Advantages**: Excellent performance, ACID compliance
+
+#### MySQL/MariaDB
+- **Best for**: Web applications, high-traffic sites
+- **Features**: Good performance, wide hosting support
+- **Note**: Use LOWER() function for case-insensitive searches
+
+#### SQL Server (Coming Soon)
+- **Best for**: Enterprise Windows environments
+- **Features**: TOP syntax instead of LIMIT
+- **Integration**: Works well with Microsoft ecosystem
+
+#### Oracle (Coming Soon)
+- **Best for**: Large enterprise applications
+- **Features**: ROWNUM for limiting results
+- **Note**: Requires Oracle client libraries
+
 ## 🔧 Configuration
 
-### Database Configuration
+### Environment Variables
 ```bash
-# SQLite (default)
-DATABASE_URL=sqlite:///sample_database.db
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
 
-# PostgreSQL
-DATABASE_URL=postgresql://user:password@host:port/database
+# Database (choose one)
+DATABASE_URL=sqlite:///northwind.db
 
-# MySQL
-DATABASE_URL=mysql://user:password@host:port/database
+# Optional
+ENVIRONMENT=development
+CORS_ORIGINS=http://localhost:3000,https://yourdomain.com
+MAX_QUERY_RESULTS=1000
+QUERY_TIMEOUT_SECONDS=30
 ```
 
 ### LLM Configuration
@@ -151,7 +232,9 @@ DATABASE_URL=mysql://user:password@host:port/database
 # OpenAI (default)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Future: Support for other LLM providers
+# The system automatically uses:
+# - GPT-4 (primary)
+# - GPT-3.5-turbo (fallback)
 ```
 
 ## 🛡️ Security Features

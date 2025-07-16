@@ -5,12 +5,12 @@ from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
 
-from database import DatabaseManager
+from database_factory import DatabaseManager
 from llm_service import LLMService
 
 load_dotenv()
 
-app = FastAPI(title="Natural Language to SQL API", version="1.0.0")
+app = FastAPI(title="Natural Language to SQL API", version="2.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -25,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize services
+# Initialize services with multi-database support
 db_manager = DatabaseManager(os.getenv("DATABASE_URL"))
 llm_service = LLMService(os.getenv("OPENAI_API_KEY"))
 
@@ -52,8 +52,9 @@ async def execute_query(request: QueryRequest):
         else:
             schema = request.schema
         
-        # Generate SQL using LLM
-        sql_query = await llm_service.generate_sql(request.question, schema)
+        # Generate SQL using LLM with database-specific dialect
+        sql_dialect = db_manager.get_sql_dialect()
+        sql_query = await llm_service.generate_sql(request.question, schema, sql_dialect)
         
         # Execute query
         results, columns = await db_manager.execute_query(sql_query)
@@ -79,7 +80,29 @@ async def get_schema():
 @app.get("/health")
 async def health_check():
     try:
-        await db_manager.test_connection()
-        return {"status": "healthy", "database": "connected"}
+        connection_status = await db_manager.test_connection()
+        return {
+            "status": "healthy" if connection_status else "unhealthy",
+            "database": "connected" if connection_status else "disconnected",
+            "database_type": db_manager.get_sql_dialect(),
+            "version": "2.0.0"
+        }
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
+
+@app.get("/database-info")
+async def get_database_info():
+    """Get information about the connected database"""
+    try:
+        return {
+            "database_type": db_manager.get_sql_dialect(),
+            "connection_string": db_manager.database_url.split('@')[0] + '@***' if '@' in db_manager.database_url else "***",
+            "supported_features": {
+                "case_insensitive_search": db_manager.get_sql_dialect() in ["PostgreSQL"],
+                "limit_syntax": "LIMIT" if db_manager.get_sql_dialect() != "SQL Server" else "TOP",
+                "supports_joins": True,
+                "supports_aggregations": True
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
