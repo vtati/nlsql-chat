@@ -11,25 +11,40 @@ A chat-based application that converts natural language queries into SQL stateme
 ## 🏗️ Project Structure
 
 ```
-├── backend/                 # Python FastAPI backend
-│   ├── main.py             # FastAPI application
-│   ├── database.py         # Database management
-│   ├── llm_service.py      # LLM integration
-│   ├── requirements.txt    # Python dependencies
-│   ├── .env               # Environment configuration
-│   └── setup_sample_db.py # Sample database setup
-├── frontend/               # React frontend
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   └── App.js        # Main application
-│   ├── package.json      # Node.js dependencies
-│   └── public/           # Static assets
-├── docs/                  # Documentation
-│   ├── requirements.md   # Requirements specification
-│   ├── design-document.md # Technical design
+├── api/                     # Backend API (FastAPI)
+│   ├── src/                 # Source code
+│   │   ├── core/            # Core business logic & settings
+│   │   ├── database/        # Database layer & adapters
+│   │   ├── services/        # Business services (LLM, Query)
+│   │   ├── models/          # Data models & schemas
+│   │   ├── api/             # API routes & endpoints
+│   │   ├── utils/           # Utilities & exceptions
+│   │   └── main.py          # Application entry point
+│   ├── config/              # Configuration files
+│   │   ├── requirements.txt # Python dependencies
+│   │   └── .env.example     # Environment template
+│   ├── scripts/             # Setup & utility scripts
+│   │   ├── test_connections.py # Database testing
+│   │   └── setup_database.py  # Database initialization
+│   └── tests/               # Test files
+├── web/                     # Frontend (React)
+│   ├── src/                 # Source code
+│   │   ├── components/      # React components
+│   │   ├── services/        # API services
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── utils/           # Frontend utilities
+│   │   └── App.js           # Main application
+│   ├── public/              # Static assets
+│   └── package.json         # Node.js dependencies
+├── docs/                    # Documentation
+│   ├── requirements.md      # Requirements specification
+│   ├── design-document.md   # Technical design
 │   └── api-documentation.md # API reference
-├── README.md             # This file
-└── start.bat            # Quick start script
+├── scripts/                 # Project-level scripts
+│   ├── start.bat           # Quick start script
+│   └── test.bat            # Testing script
+├── .kiro/                  # Kiro IDE configuration
+└── README.md               # This file
 ```
 
 ## 🚀 Enhanced Features (v2.0)
@@ -63,38 +78,39 @@ A chat-based application that converts natural language queries into SQL stateme
 2. **Configure environment:**
    ```bash
    # Copy environment template
-   cp backend/.env.example backend/.env
+   cp api/config/.env.example api/config/.env
    
-   # Edit backend/.env and add your OpenAI API key:
+   # Edit api/config/.env and add your OpenAI API key:
    OPENAI_API_KEY=your_openai_api_key_here
    ```
 
-3. **Setup sample database:**
+3. **Setup and test database:**
    ```bash
-   cd backend
-   python setup_sample_db.py
+   cd api
+   python scripts/test_connections.py  # Test connections
+   python scripts/setup_database.py   # Initialize sample data
    ```
 
 4. **Start the application:**
    ```bash
    # Option 1: Use the start script (Windows)
-   start.bat
+   scripts/start.bat
    
    # Option 2: Manual startup
-   # Terminal 1 - Backend
-   cd backend
-   pip install -r requirements.txt
-   uvicorn main:app --reload
+   # Terminal 1 - API Server
+   cd api
+   pip install -r config/requirements.txt
+   python -m src.main
    
-   # Terminal 2 - Frontend
-   cd frontend
+   # Terminal 2 - Web Application
+   cd web
    npm install
    npm start
    ```
 
 5. **Access the application:**
-   - **Frontend**: http://localhost:3000
-   - **Backend API**: http://localhost:8000
+   - **Web App**: http://localhost:3000
+   - **API Server**: http://localhost:8000
    - **API Docs**: http://localhost:8000/docs
 
 ### Sample Queries to Try

@@ -2,45 +2,77 @@
 
 ## Root Directory Layout
 ```
-├── backend/                 # Python FastAPI backend
-├── frontend/               # React frontend application
-├── docs/                   # Project documentation
-├── .kiro/                  # Kiro IDE configuration
-├── README.md              # Main project documentation
-├── start.bat              # Windows development startup script
-└── deployment configs     # Various deployment configurations
+├── api/                     # Backend API (FastAPI)
+├── web/                     # Frontend Web Application (React)
+├── docs/                    # Project documentation
+├── scripts/                 # Project-level scripts
+├── .kiro/                   # Kiro IDE configuration
+├── README.md               # Main project documentation
+└── deployment configs      # Various deployment configurations
 ```
 
-## Backend Structure (`backend/`)
+## API Structure (`api/`)
 ```
-backend/
-├── main.py                # FastAPI application entry point
-├── database.py            # Database connection and query management
-├── llm_service.py         # OpenAI LLM integration service
-├── setup_sample_db.py     # Sample database initialization
-├── test_connection.py     # Connection testing utility
-├── requirements.txt       # Python dependencies
-├── .env                   # Environment variables (not in git)
-├── .env.example          # Environment template
-├── sample_database.db    # SQLite sample database
-├── northwind.db          # Additional sample database
-└── deployment files      # Procfile, railway.json, etc.
+api/
+├── src/                    # Source code
+│   ├── core/              # Core business logic & settings
+│   │   ├── __init__.py    # Core exports
+│   │   └── settings.py    # Application settings & configuration
+│   ├── database/          # Database layer & adapters
+│   │   ├── __init__.py    # Database exports
+│   │   ├── adapters.py    # Database adapters (SQLite, PostgreSQL, MySQL)
+│   │   ├── factory.py     # Database factory pattern
+│   │   └── manager.py     # Database manager
+│   ├── services/          # Business services
+│   │   ├── __init__.py    # Services exports
+│   │   ├── llm_service.py # LLM integration service
+│   │   └── query_service.py # Query processing service
+│   ├── models/            # Data models & schemas
+│   │   ├── __init__.py    # Models exports
+│   │   └── query_models.py # Pydantic models for API
+│   ├── api/               # API routes & endpoints
+│   │   ├── __init__.py    # API exports
+│   │   └── routes.py      # FastAPI route definitions
+│   ├── utils/             # Utilities & exceptions
+│   │   ├── __init__.py    # Utils exports
+│   │   ├── logging.py     # Logging configuration
+│   │   └── exceptions.py  # Custom exceptions
+│   └── main.py            # Application entry point
+├── config/                # Configuration files
+│   ├── requirements.txt   # Python dependencies
+│   ├── .env.example      # Environment template
+│   └── .env              # Environment variables (not in git)
+├── scripts/               # Setup & utility scripts
+│   ├── test_connections.py # Database connection testing
+│   └── setup_database.py  # Database initialization
+└── tests/                 # Test files (future)
 ```
 
-## Frontend Structure (`frontend/`)
+## Web Structure (`web/`)
 ```
-frontend/
-├── src/
-│   ├── components/       # React components
-│   │   ├── ChatInterface.js    # Main chat component
-│   │   └── ChatInterface.css   # Component styles
-│   ├── App.js           # Main React application
-│   └── index.js         # React entry point
-├── public/              # Static assets
-├── build/               # Production build output
-├── package.json         # Node.js dependencies and scripts
-├── package-lock.json    # Dependency lock file
-└── deployment files     # vercel.json, etc.
+web/
+├── src/                   # Source code
+│   ├── components/        # React components
+│   │   ├── QueryInput.js     # Natural language input component
+│   │   ├── QueryInput.css    # Input component styles
+│   │   ├── ResultsTable.js   # Query results display
+│   │   ├── ResultsTable.css  # Results component styles
+│   │   ├── DatabaseStatus.js # Database status component
+│   │   └── DatabaseStatus.css # Status component styles
+│   ├── services/          # API services
+│   │   └── apiService.js     # Backend API communication
+│   ├── hooks/             # Custom React hooks
+│   │   ├── useQuery.js       # Query execution hook
+│   │   └── useDatabase.js    # Database info hook
+│   ├── utils/             # Frontend utilities
+│   ├── types/             # TypeScript types (future)
+│   ├── App.js            # Main React application
+│   ├── App.css           # Main application styles
+│   ├── index.js          # React entry point
+│   └── index.css         # Global styles
+├── public/               # Static assets
+├── package.json          # Node.js dependencies and scripts
+└── package-lock.json     # Dependency lock file
 ```
 
 ## Documentation Structure (`docs/`)

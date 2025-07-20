@@ -34,13 +34,13 @@
 
 ### Development Setup
 ```bash
-# Backend setup
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
+# API setup
+cd api
+pip install -r config/requirements.txt
+python -m src.main
 
-# Frontend setup  
-cd frontend
+# Web setup  
+cd web
 npm install
 npm start
 ```
@@ -48,17 +48,20 @@ npm start
 ### Quick Start
 ```bash
 # Windows batch script
-start.bat
+scripts/start.bat
 ```
 
 ### Testing
 ```bash
-# Backend testing
-cd backend
-python test_connection.py
+# Database connection testing
+cd api
+python scripts/test_connections.py
 
-# Frontend testing
-cd frontend
+# Database setup
+python scripts/setup_database.py
+
+# Web testing
+cd web
 npm test
 ```
 
@@ -66,6 +69,9 @@ npm test
 ```bash
 # API health check
 curl http://localhost:8000/health
+
+# Database info
+curl http://localhost:8000/database-info
 
 # Sample query test
 curl -X POST http://localhost:8000/query -H "Content-Type: application/json" -d '{"question": "Show me all customers"}'
