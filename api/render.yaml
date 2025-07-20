@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: nlsql-api
+    env: python
+    buildCommand: pip install -r config/requirements.txt
+    startCommand: python start_server.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        value: sqlite:///northwind.db
+      - key: OPENAI_API_KEY
+        sync: false  # This will be set manually in Render dashboard
+      - key: ENVIRONMENT
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PORT
+        value: 10000  # Render uses port 10000
+    disk:
+      name: nlsql-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

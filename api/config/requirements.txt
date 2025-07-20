@@ -10,16 +10,9 @@ python-multipart>=0.0.6
 aiosqlite>=0.19.0
 asyncpg>=0.29.0
 aiomysql>=0.2.0
-# pyodbc>=5.0.0  # Uncomment for SQL Server support
-# cx_Oracle>=8.3.0  # Uncomment for Oracle support
 
 # LLM integration
 openai>=1.0.0
 
-# Optional: Enhanced database support
-# sqlalchemy[asyncio]>=2.0.0  # For advanced ORM features
-
-# Development dependencies (optional)
-# pytest>=7.0.0
-# pytest-asyncio>=0.21.0
-# httpx>=0.25.0  # For testing API endpoints
+# Production dependencies
+gunicorn>=21.2.0  # Production WSGI server alternative

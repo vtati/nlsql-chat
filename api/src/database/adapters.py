@@ -70,10 +70,21 @@ class SQLiteAdapter(DatabaseAdapter):
     async def connect(self):
         """Establish SQLite connection."""
         import aiosqlite
+        import os
         
         # Extract database path from connection string
         parsed = urlparse(self.connection_string)
         db_path = parsed.path.lstrip('/')
+        
+        # For production, ensure database directory exists
+        if os.getenv('ENVIRONMENT') == 'production':
+            # Create data directory if it doesn't exist
+            data_dir = '/opt/render/project/src/data'
+            if os.path.exists(data_dir):
+                db_path = os.path.join(data_dir, os.path.basename(db_path))
+            else:
+                # Fallback to current directory
+                db_path = os.path.join(os.getcwd(), db_path)
         
         self.connection = await aiosqlite.connect(db_path)
         self.connection.row_factory = aiosqlite.Row

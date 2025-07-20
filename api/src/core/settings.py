@@ -59,12 +59,15 @@ class APISettings(BaseSettings):
     port: int = Field(default=8000, env="API_PORT")
     debug: bool = Field(default=False, env="API_DEBUG")
     
-    # CORS settings
+    # CORS settings - Updated for production
     cors_origins: List[str] = Field(
         default=[
             "http://localhost:3000",
+            "https://nlsql-chat.vercel.app",
             "https://*.vercel.app",
-            "*"
+            "https://*.render.com",
+            "https://*.onrender.com",
+            "*"  # Remove this in production for security
         ],
         env="CORS_ORIGINS"
     )

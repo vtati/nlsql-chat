@@ -21,9 +21,21 @@ print(f"OpenAI API Key: {'Configured' if os.getenv('OPENAI_API_KEY') else 'Not f
 
 if __name__ == "__main__":
     print("Starting Natural Language to SQL API Server...")
+    
+    # Get port from environment (Render uses PORT env var)
+    port = int(os.getenv("PORT", os.getenv("API_PORT", "8000")))
+    host = os.getenv("API_HOST", "0.0.0.0")
+    
+    # Disable reload in production
+    is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
+    
+    print(f"Server starting on {host}:{port}")
+    print(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
+    print(f"Reload: {not is_production}")
+    
     uvicorn.run(
         "src.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True
+        host=host,
+        port=port,
+        reload=not is_production
     )

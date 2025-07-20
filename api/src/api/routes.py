@@ -13,7 +13,7 @@ from ..models.query_models import (
 from ..services.query_service import QueryService
 from ..database.manager import DatabaseManager
 from ..services.llm_service import LLMService
-from ..core.simple_settings import settings
+from ..core.settings import settings
 
 # Create router
 router = APIRouter()
@@ -21,7 +21,7 @@ router = APIRouter()
 # Dependency injection
 def get_database_manager() -> DatabaseManager:
     """Get database manager instance."""
-    return DatabaseManager(settings.database_url)
+    return DatabaseManager(settings.database.url)
 
 def get_llm_service() -> LLMService:
     """Get LLM service instance."""
@@ -40,8 +40,17 @@ async def root():
     """Root endpoint returning API information."""
     return {
         "message": "Natural Language to SQL API",
-        "version": settings.api_version,
-        "description": "Convert natural language questions to SQL queries"
+        "version": settings.api.version,
+        "description": "Convert natural language questions to SQL queries",
+        "status": "running",
+        "environment": settings.environment,
+        "endpoints": {
+            "health": "/health",
+            "query": "/query", 
+            "schema": "/schema",
+            "database_info": "/database-info",
+            "docs": "/docs"
+        }
     }
 
 
@@ -111,7 +120,7 @@ async def health_check(query_service: QueryService = Depends(get_query_service))
             status="healthy" if connection_status else "unhealthy",
             database="connected" if connection_status else "disconnected",
             database_type=db_info["database_type"],
-            version=settings.api_version,
+            version=settings.api.version,
             timestamp=datetime.utcnow().isoformat() + "Z"
         )
     except Exception as e:
@@ -119,6 +128,6 @@ async def health_check(query_service: QueryService = Depends(get_query_service))
             status="unhealthy",
             database="error",
             database_type="unknown",
-            version=settings.api_version,
+            version=settings.api.version,
             timestamp=datetime.utcnow().isoformat() + "Z"
         )
